@@ -11,7 +11,7 @@ import pandas as pd
 DEFAULT_CATEGORICAL = ['PUlocationID', 'DOlocationID']
 
 
-def _get_storage_options():
+def get_storage_options():
     log = logging.getLogger(__name__)
     s3_endpoint_url = os.getenv('S3_ENDPOINT_URL')
     if s3_endpoint_url is not None:
@@ -45,7 +45,7 @@ def prepare_data(df, categorical):
 
 
 def read_data(filename, categorical):
-    df = pd.read_parquet(filename, storage_options=_get_storage_options())
+    df = pd.read_parquet(filename, storage_options=get_storage_options())
     df = prepare_data(df, categorical)
     return df
 
@@ -72,7 +72,7 @@ def main(year: int, month: int):
         engine='pyarrow', 
         index=False,
         compression=None,
-        storage_options=_get_storage_options()
+        storage_options=get_storage_options()
     )
 
 
