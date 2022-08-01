@@ -50,12 +50,22 @@ def read_data(filename, categorical):
     return df
 
 
+def save_data(df, output_path):
+    df.to_parquet(
+        output_path,
+        engine='pyarrow',
+        index=False,
+        compression=None,
+        storage_options=get_storage_options()
+    )
+
+
 def main(year: int, month: int):
     with open('model.bin', 'rb') as f_in:
         dv, lr = pickle.load(f_in)
 
     input_file = get_input_path(year, month)
-    output_file = get_output_path(year, month)
+    output_path = get_output_path(year, month)
 
     df = read_data(input_file, DEFAULT_CATEGORICAL)
     df['ride_id'] = f'{year:04d}/{month:02d}_' + df.index.astype('str')
@@ -67,13 +77,7 @@ def main(year: int, month: int):
     df_result['ride_id'] = df['ride_id']
     df_result['predicted_duration'] = y_pred
 
-    df_result.to_parquet(
-        output_file, 
-        engine='pyarrow', 
-        index=False,
-        compression=None,
-        storage_options=get_storage_options()
-    )
+    save_data(df_result, output_path)
 
 
 if __name__ == '__main__':

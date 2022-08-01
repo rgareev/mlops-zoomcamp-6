@@ -1,7 +1,8 @@
 from datetime import datetime
 import logging
+from subprocess import run
 
-from batch import get_storage_options, get_input_path
+from batch import get_storage_options, get_input_path, get_output_path
 
 import pandas as pd
 
@@ -10,6 +11,7 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
+# PREPARE TEST INPUT DATA
 def dt(hour, minute, second=0):
     return datetime(2021, 1, 1, hour, minute, second)
 
@@ -32,3 +34,15 @@ df.to_parquet(
     index=False,
     storage_options=get_storage_options()
 )
+
+# CALL
+run(["python", "batch.py", "2021", "01"], check=True)
+
+# CHECK OUTPUTS
+expected_output_path = get_output_path(2021, 1)
+log.info("Reading from %s", expected_output_path)
+actual_df = pd.read_parquet(
+    expected_output_path,
+    storage_options=get_storage_options())
+print(actual_df.predicted_duration.sum())
+assert round(actual_df.predicted_duration.sum()) == 69
